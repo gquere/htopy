@@ -8,18 +8,40 @@ LIBNAME = 'example'
 
 # Correlation table for direct types
 cor =    {
-    'char': 'c_char',
-    'int32_t': 'c_int32',
-    'int': 'c_int',
+    'bool': 'ctypes.c_bool',
+    'char': 'ctypes.c_char',
+    'byte': 'ctypes.c_byte',
+    'unsigned byte': 'ctypes.c_ubyte',
+    'short': 'ctypes.c_short',
+    'unsigned short': 'ctypes.c_ushort',
+    'int': 'ctypes.c_int',
+    'unsigned int': 'ctypes.c_uint',
+    'long': 'ctypes.c_long',
+    'unsigned long': 'ctypes.c_ulong',
+    'long long': 'ctypes.c_longlong',
+    'unsigned long long': 'ctypes.c_ulonglong',
+    'float': 'ctypes.c_float',
+    'double': 'ctypes.c_double',
     'void': 'None',
-    'size_t': 'c_int',
-    'sem_t': 'c_int',
+
+    'int8_t': 'ctypes.c_int8',
+    'int16_t': 'ctypes.c_int16',
+    'int32_t': 'ctypes.c_int32',
+    'int64_t': 'ctypes.c_int64',
+
+    'uint8_t': 'ctypes.c_uint8',
+    'uint16_t': 'ctypes.c_uint16',
+    'uint32_t': 'ctypes.c_uint32',
+    'uint64_t': 'ctypes.c_uint64',
+
+    'size_t': 'ctypes.c_int',
+    'sem_t': 'ctypes.c_int',
     }
 
 # Correlation table for pointer types
 corp =    {
-    'char': 'c_char_p',
-    'void': 'c_void_p',
+    'char': 'ctypes.c_char_p',
+    'void': 'ctypes.c_void_p',
     }
 
 def getCor(member_type):
@@ -27,12 +49,12 @@ def getCor(member_type):
         try:
             pytype = corp[member_type[0]]
         except KeyError:
-            pytype = 'c_void_p'
+            pytype = 'ctypes.c_void_p'
     else:
         try:
             pytype = cor[member_type[0]]
         except KeyError:
-            pytype = 'c_void_p'
+            pytype = 'ctypes.c_void_p'
 
     return pytype
 
@@ -82,10 +104,10 @@ def doArgs(arguments):
     print(']')
 
 def doFunction(function, name):
-    print(name + ' = ' + LIBNAME + '.' + name)
-    print(name + '.argtypes = '),
+    print('self.' + name + ' = ' + 'self._lib.' + name)
+    print('self.' + name + '.argtypes = '),
     doArgs(function[1])
-    print(name + '.restype = ' + getCor(function[0]))
+    print('self.' + name + '.restype = ' + getCor(function[0]))
     print
 
 def doFunctions(functions):
@@ -109,14 +131,6 @@ if __name__ == '__main__':
     cheader = sys.argv[1]
     p = CParser(cheader)
     p.processAll()
-
-    LIBNAME = os.path.basename(sys.argv[1]).split('.')[0]
-    LIBNAME = 'lib' + LIBNAME
-
-    print('from ctypes import *')
-    print
-    print(LIBNAME + ' = CDLL(\'' + LIBNAME + '.so\')')
-    print
 
     for k in p.dataList:
         if bool(p.defs[k]):
